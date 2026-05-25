@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rede Social</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            padding: 15px;
+            background: #1877f2;
+            color: white;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .bottom-nav {
+            display: flex;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 12px 5px;
+            border: none;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .nav-btn:hover { background: #f0f2f5; }
+        .nav-btn.active {
+            color: #1877f2;
+            font-weight: bold;
+            border-top: 3px solid #1877f2;
+        }
+
+        /* Produtos */
+        .produto-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .produto-form input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .produto-form button {
+            padding: 12px;
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .produto-item {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .produto-info { flex: 1; display: flex; flex-direction: column; }
+        .produto-nome { font-weight: bold; font-size: 16px; }
+        .produto-preco { color: #2e7d32; font-weight: 500; }
+        .acoes { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+        .acoes button {
+            background: #f0f0f0; border: none; border-radius: 6px; padding: 6px 8px;
+            cursor: pointer; font-size: 12px; display: flex; align-items: center;
+            justify-content: center; min-width: 32px; transition: 0.1s;
+        }
+        .acoes button:hover { background: #e0e0e0; }
+        .btn-editar { background: #fff3e0; color: #e65100; }
+        .btn-excluir { background: #ffebee; color: #b71c1c; }
+        .btn-cima { background: #e3f2fd; color: #0d47a1; }
+        .btn-baixo { background: #e8f5e9; color: #1b5e20; }
+
+        /* Vendas */
+        .produtos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .produto-card {
+            background: white; border: 2px solid #e0e0e0; border-radius: 12px;
+            padding: 12px 8px; text-align: center; cursor: pointer; transition: 0.2s;
+            font-weight: 500;
+        }
+        .produto-card:hover { border-color: #1877f2; background: #f0f7ff; }
+        .produto-card .nome { font-size: 14px; display: block; margin-bottom: 4px; }
+        .produto-card .preco { color: #2e7d32; font-size: 16px; font-weight: bold; }
+        .vendas-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #e8f5e9; padding: 12px; border-radius: 10px; margin-bottom: 10px;
+        }
+        .total-vendido { font-weight: bold; font-size: 18px; color: #1b5e20; }
+        .venda-item {
+            background: white; border-radius: 10px; padding: 10px; margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .venda-info { flex: 1; }
+        .venda-nome { font-weight: bold; font-size: 15px; }
+        .venda-detalhes { font-size: 13px; color: #555; }
+        .venda-preco { font-weight: bold; color: #2e7d32; margin-right: 8px; }
+        .btn-excluir-venda {
+            background: #ffebee; color: #b71c1c; border: none; border-radius: 6px;
+            padding: 6px 8px; cursor: pointer; font-size: 12px;
+        }
+
+        /* Contas */
+        .conta-item {
+            background: white; border-radius: 10px; padding: 12px; margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .conta-item.desativada {
+            opacity: 0.7;
+            background: #e9e9e9;
+            pointer-events: auto; /* permite clicar nos botões de reabrir/excluir */
+        }
+        .conta-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; flex-wrap: wrap;
+        }
+        .conta-nome { font-weight: bold; font-size: 16px; }
+        .conta-saldo {
+            font-weight: bold; font-size: 16px;
+            color: #2e7d32;
+        }
+        .conta-saldo.devedor { color: #d32f2f; }
+        .conta-status {
+            font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;
+            background: #e0e0e0; color: #555;
+        }
+        .conta-status.ativa { background: #e8f5e9; color: #2e7d32; }
+        .conta-status.fechada { background: #ffebee; color: #b71c1c; }
+        .conta-acoes {
+            display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;
+        }
+        .conta-acoes button {
+            background: #f5f5f5; border: none; border-radius: 6px; padding: 6px 10px;
+            cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 4px;
+        }
+        .conta-acoes button:hover { background: #e0e0e0; }
+        .btn-pagamento { background: #fff8e1; color: #f57f17; }
+        .btn-fechar { background: #ffebee; color: #b71c1c; }
+        .btn-reabrir { background: #e8f5e9; color: #1b5e20; }
+
+        /* Grid de produtos dentro da conta (para adicionar) */
+        .conta-produtos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .conta-produto-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 8px 5px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.1s;
+        }
+        .conta-produto-card:hover {
+            background: #e3f2fd;
+            border-color: #1877f2;
+        }
+        .conta-produto-card .nome {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 2px;
+            font-size: 12px;
+        }
+        .conta-produto-card .preco {
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 13px;
+        }
+
+        /* Lista vertical de itens da conta */
+        .itens-lista {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .item-conta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            background: #f9f9f9;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+        .item-conta .nome-item { font-weight: 500; }
+        .item-conta .preco-item { color: #2e7d32; font-weight: bold; }
+
+        .sem-contas { text-align: center; color: #999; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">📱 Minha Rede</div>
+        <div class="content" id="content"></div>
+        <div class="bottom-nav">
+            <button class="nav-btn active" onclick="mostrarTela('produtos')">
+                <span>🛒</span> Produtos
+            </button>
+            <button class="nav-btn" onclick="mostrarTela('vendas')">
+                <span>💰</span> Vendas
+            </button>
+            <button class="nav-btn" onclick="mostrarTela('contas')">
+                <span>👤</span> Contas
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ========== ESTADO GLOBAL ==========
+        let produtos = [
+            { nome: 'Arroz 5kg', preco: 18.90 },
+            { nome: 'Feijão 1kg', preco: 7.50 },
+            { nome: 'Óleo de soja', preco: 6.20 }
+        ];
+        let editandoIndex = null;
+        let vendas = [];
+        let contas = [];
+        let proximoIdConta = 1;
+
+        // ========== NAVEGAÇÃO ==========
+        function mostrarTela(tela) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.nav-btn').classList.add('active');
+            
+            let html = '';
+            switch(tela) {
+                case 'produtos': html = gerarTelaProdutos(); break;
+                case 'vendas': html = gerarTelaVendas(); break;
+                case 'contas': html = gerarTelaContas(); break;
+            }
+            document.getElementById('content').innerHTML = html;
+            
+            if (tela === 'produtos') attachProdutoEvents();
+            else if (tela === 'vendas') attachVendasEvents();
+            else if (tela === 'contas') attachContasEvents();
+        }
+
+        // ========== PRODUTOS ==========
+        function gerarTelaProdutos() {
+            let html = `
+                <h2>🛒 Produtos</h2>
+                <div class="produto-form" id="produtoForm">
+                    <input type="text" id="nomeProduto" placeholder="Nome do produto" required>
+                    <input type="number" id="precoProduto" placeholder="Preço" step="0.01" min="0" required>
+                    <button id="btnSalvar">${editandoIndex !== null ? 'Atualizar' : 'Adicionar'}</button>
+                </div>
+                <div id="listaProdutos">`;
+            if (produtos.length === 0) {
+                html += '<div class="sem-produtos">Nenhum produto cadastrado.</div>';
+            } else {
+                produtos.forEach((p, i) => {
+                    html += `
+                        <div class="produto-item">
+                            <div class="produto-info">
+                                <span class="produto-nome">${p.nome}</span>
+                                <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
+                            </div>
+                            <div class="acoes">
+                                <button class="btn-editar" onclick="editarProduto(${i})">✏️</button>
+                                <button class="btn-excluir" onclick="excluirProduto(${i})">🗑️</button>
+                                <button class="btn-cima" onclick="moverProduto(${i},'cima')">⬆️</button>
+                                <button class="btn-baixo" onclick="moverProduto(${i},'baixo')">⬇️</button>
+                            </div>
+                        </div>`;
+                });
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function attachProdutoEvents() {
+            document.getElementById('btnSalvar')?.addEventListener('click', salvarProduto);
+            document.getElementById('nomeProduto')?.addEventListener('keypress', e => e.key === 'Enter' && salvarProduto());
+            document.getElementById('precoProduto')?.addEventListener('keypress', e => e.key === 'Enter' && salvarProduto());
+        }
+
+        function salvarProduto() {
+            const nome = document.getElementById('nomeProduto').value.trim();
+            const preco = parseFloat(document.getElementById('precoProduto').value);
+            if (!nome || isNaN(preco) || preco < 0) return alert('Preencha corretamente.');
+            if (editandoIndex !== null) {
+                produtos[editandoIndex] = { nome, preco };
+                editandoIndex = null;
+            } else {
+                produtos.push({ nome, preco });
+            }
+            document.getElementById('content').innerHTML = gerarTelaProdutos();
+            attachProdutoEvents();
+        }
+
+        function editarProduto(index) {
+            editandoIndex = index;
+            document.getElementById('nomeProduto').value = produtos[index].nome;
+            document.getElementById('precoProduto').value = produtos[index].preco;
+            document.getElementById('btnSalvar').textContent = 'Atualizar';
+            document.getElementById('nomeProduto').focus();
+        }
+
+        function excluirProduto(index) {
+            if (confirm(`Excluir "${produtos[index].nome}"?`)) {
+                produtos.splice(index, 1);
+                if (editandoIndex === index) editandoIndex = null;
+                else if (editandoIndex > index) editandoIndex--;
+                document.getElementById('content').innerHTML = gerarTelaProdutos();
+                attachProdutoEvents();
+            }
+        }
+
+        function moverProduto(index, dir) {
+            if (dir === 'cima' && index > 0) {
+                [produtos[index], produtos[index-1]] = [produtos[index-1], produtos[index]];
+                if (editandoIndex === index) editandoIndex--;
+                else if (editandoIndex === index-1) editandoIndex++;
+            } else if (dir === 'baixo' && index < produtos.length-1) {
+                [produtos[index], produtos[index+1]] = [produtos[index+1], produtos[index]];
+                if (editandoIndex === index) editandoIndex++;
+                else if (editandoIndex === index+1) editandoIndex--;
+            }
+            document.getElementById('content').innerHTML = gerarTelaProdutos();
+            attachProdutoEvents();
+        }
+
+        // ========== VENDAS ==========
+        function gerarTelaVendas() {
+            let html = '<h2>💰 Vendas</h2>';
+            if (produtos.length === 0) {
+                html += '<p style="text-align:center;color:#999">Cadastre produtos primeiro.</p>';
+            } else {
+                html += '<p style="font-weight:500;margin-bottom:8px;">Toque em um produto para registrar a venda:</p>';
+                html += '<div class="produtos-grid" id="produtosGrid">';
+                produtos.forEach((p, i) => {
+                    html += `<div class="produto-card" data-index="${i}"><span class="nome">${p.nome}</span><span class="preco">R$ ${p.preco.toFixed(2)}</span></div>`;
+                });
+                html += '</div>';
+            }
+            const total = vendas.reduce((s, v) => s + v.preco, 0);
+            html += `<div class="vendas-header"><span>Registro de Vendas</span><span class="total-vendido">Total: R$ ${total.toFixed(2)}</span></div><div id="listaVendas">`;
+            if (vendas.length === 0) {
+                html += '<div class="sem-produtos">Nenhuma venda registrada.</div>';
+            } else {
+                vendas.slice().reverse().forEach((v, revIdx) => {
+                    const idx = vendas.length - 1 - revIdx;
+                    html += `
+                        <div class="venda-item">
+                            <div class="venda-info"><div class="venda-nome">${v.nome}</div><div class="venda-detalhes">${v.data}</div></div>
+                            <span class="venda-preco">R$ ${v.preco.toFixed(2)}</span>
+                            <button class="btn-excluir-venda" onclick="excluirVenda(${idx})">🗑️</button>
+                        </div>`;
+                });
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function attachVendasEvents() {
+            document.querySelectorAll('.produto-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    const data = new Date().toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+                    vendas.push({ nome: produtos[idx].nome, preco: produtos[idx].preco, data });
+                    document.getElementById('content').innerHTML = gerarTelaVendas();
+                    attachVendasEvents();
+                });
+            });
+        }
+
+        function excluirVenda(index) {
+            if (confirm('Excluir esta venda?')) {
+                vendas.splice(index, 1);
+                document.getElementById('content').innerHTML = gerarTelaVendas();
+                attachVendasEvents();
+            }
+        }
+
+        // ========== CONTAS ==========
+        function gerarTelaContas() {
+            let html = '<h2>👤 Contas</h2>';
+            html += `
+                <div class="produto-form" style="margin-bottom:20px;">
+                    <input type="text" id="nomeConta" placeholder="Nome do cliente" required>
+                    <button id="btnCriarConta">Criar Conta</button>
+                </div>
+                <div id="listaContas">`;
+            if (contas.length === 0) {
+                html += '<div class="sem-contas">Nenhuma conta criada.</div>';
+            } else {
+                contas.forEach((conta, idx) => {
+                    const totalItens = conta.itens.reduce((s, i) => s + i.preco, 0);
+                    const totalPago = conta.pagamentos.reduce((s, p) => s + p.valor, 0);
+                    const saldo = totalItens - totalPago;
+                    const statusClass = conta.ativa ? 'ativa' : 'fechada';
+                    const saldoClass = saldo > 0 ? 'devedor' : '';
+                    const statusTexto = conta.ativa ? 'Ativa' : 'Fechada';
+                    const contaDesativada = !conta.ativa ? 'desativada' : '';
+                    
+                    html += `
+                        <div class="conta-item ${contaDesativada}">
+                            <div class="conta-header">
+                                <span class="conta-nome">${conta.nome}</span>
+                                <span class="conta-saldo ${saldoClass}">R$ ${saldo.toFixed(2)}</span>
+                                <span class="conta-status ${statusClass}">${statusTexto}</span>
+                            </div>
+                            <div class="conta-acoes">
+                                ${conta.ativa ? `
+                                    <button class="btn-pagamento" onclick="marcarPagamento(${conta.id})">💵 Pagamento</button>
+                                    <button class="btn-fechar" onclick="fecharConta(${conta.id})">🔒 Fechar</button>
+                                ` : `
+                                    <button class="btn-reabrir" onclick="reabrirConta(${conta.id})">🔓 Reabrir</button>
+                                `}
+                                <button class="btn-excluir" onclick="excluirConta(${conta.id})">🗑️</button>
+                                <button class="btn-cima" onclick="moverConta(${conta.id},'cima')">⬆️</button>
+                                <button class="btn-baixo" onclick="moverConta(${conta.id},'baixo')">⬇️</button>
+                            </div>`;
+                    
+                    // Grid de produtos para adicionar (apenas se conta ativa e existem produtos)
+                    if (conta.ativa && produtos.length > 0) {
+                        html += `<div class="conta-produtos-grid">`;
+                        produtos.forEach((p, i) => {
+                            html += `
+                                <div class="conta-produto-card" onclick="adicionarProdutoConta(${conta.id}, ${i})">
+                                    <span class="nome">${p.nome}</span>
+                                    <span class="preco">R$ ${p.preco.toFixed(2)}</span>
+                                </div>`;
+                        });
+                        html += `</div>`;
+                    } else if (produtos.length === 0) {
+                        html += `<p style="color:#999; font-size:13px;">Nenhum produto cadastrado.</p>`;
+                    }
+                    
+                    // Lista vertical de itens (mais recente primeiro)
+                    if (conta.itens.length > 0) {
+                        html += `<div class="itens-lista">`;
+                        // Itera de trás para frente
+                        for (let i = conta.itens.length - 1; i >= 0; i--) {
+                            const item = conta.itens[i];
+                            html += `
+                                <div class="item-conta">
+                                    <span class="nome-item">${item.nome}</span>
+                                    <span class="preco-item">R$ ${item.preco.toFixed(2)}</span>
+                                </div>`;
+                        }
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                });
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function attachContasEvents() {
+            document.getElementById('btnCriarConta')?.addEventListener('click', criarConta);
+            document.getElementById('nomeConta')?.addEventListener('keypress', e => e.key === 'Enter' && criarConta());
+        }
+
+        function criarConta() {
+            const nome = document.getElementById('nomeConta').value.trim();
+            if (!nome) return alert('Informe um nome.');
+            contas.push({ id: proximoIdConta++, nome, itens: [], pagamentos: [], ativa: true });
+            document.getElementById('content').innerHTML = gerarTelaContas();
+            attachContasEvents();
+        }
+
+        function adicionarProdutoConta(idConta, idxProduto) {
+            const conta = contas.find(c => c.id === idConta);
+            if (!conta || !conta.ativa) return alert('Conta não encontrada ou fechada.');
+            conta.itens.push({ nome: produtos[idxProduto].nome, preco: produtos[idxProduto].preco });
+            document.getElementById('content').innerHTML = gerarTelaContas();
+            attachContasEvents();
+        }
+
+        function marcarPagamento(idConta) {
+            const conta = contas.find(c => c.id === idConta);
+            if (!conta || !conta.ativa) return alert('Conta não encontrada ou fechada.');
+            const totalItens = conta.itens.reduce((s, i) => s + i.preco, 0);
+            const totalPago = conta.pagamentos.reduce((s, p) => s + p.valor, 0);
+            const saldo = totalItens - totalPago;
+            if (saldo <= 0) return alert('Saldo já está zerado.');
+            
+            const valor = prompt(`Saldo atual: R$ ${saldo.toFixed(2)}\nValor do pagamento:`);
+            if (valor === null) return;
+            const valorNum = parseFloat(valor.replace(',', '.'));
+            if (isNaN(valorNum) || valorNum <= 0) return alert('Valor inválido.');
+            
+            const data = new Date().toLocaleString('pt-BR');
+            conta.pagamentos.push({ valor: valorNum, data });
+            
+            // Adiciona o pagamento como venda
+            vendas.push({
+                nome: `Pagamento - ${conta.nome}`,
+                preco: valorNum,
+                data
+            });
+            
+            // Desativa a conta automaticamente
+            conta.ativa = false;
+            
+            document.getElementById('content').innerHTML = gerarTelaContas();
+            attachContasEvents();
+        }
+
+        function fecharConta(idConta) {
+            const conta = contas.find(c => c.id === idConta);
+            if (!conta || !conta.ativa) return;
+            
+            const totalItens = conta.itens.reduce((s, i) => s + i.preco, 0);
+            const totalPago = conta.pagamentos.reduce((s, p) => s + p.valor, 0);
+            const saldo = totalItens - totalPago;
+            
+            if (saldo > 0) {
+                const data = new Date().toLocaleString('pt-BR');
+                // Registra o saldo devedor como venda
+                vendas.push({
+                    nome: `Fechamento - ${conta.nome}`,
+                    preco: saldo,
+                    data
+                });
+            }
+            
+            conta.ativa = false;
+            document.getElementById('content').innerHTML = gerarTelaContas();
+            attachContasEvents();
+        }
+
+        function reabrirConta(idConta) {
+            const conta = contas.find(c => c.id === idConta);
+            if (conta && !conta.ativa) {
+                conta.ativa = true;
+                document.getElementById('content').innerHTML = gerarTelaContas();
+                attachContasEvents();
+            }
+        }
+
+        function excluirConta(idConta) {
+            if (confirm('Excluir esta conta?')) {
+                contas = contas.filter(c => c.id !== idConta);
+                document.getElementById('content').innerHTML = gerarTelaContas();
+                attachContasEvents();
+            }
+        }
+
+        function moverConta(idConta, dir) {
+            const idx = contas.findIndex(c => c.id === idConta);
+            if (idx === -1) return;
+            if (dir === 'cima' && idx > 0) {
+                [contas[idx], contas[idx-1]] = [contas[idx-1], contas[idx]];
+            } else if (dir === 'baixo' && idx < contas.length-1) {
+                [contas[idx], contas[idx+1]] = [contas[idx+1], contas[idx]];
+            }
+            document.getElementById('content').innerHTML = gerarTelaContas();
+            attachContasEvents();
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+        window.onload = () => mostrarTela('produtos');
+    </script>
+</body>
+</html>
